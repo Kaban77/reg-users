@@ -1,7 +1,7 @@
 package ru.demidov.interfaces;
 
 import ru.demidov.objects.Response;
-import ru.demidov.objects.Users;
+import ru.demidov.users.Users;
 
 import javax.servlet.http.HttpServletRequest;
 

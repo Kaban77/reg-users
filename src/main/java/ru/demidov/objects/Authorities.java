@@ -1,9 +1,10 @@
 package ru.demidov.objects;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 @Entity
 public class Authorities {
@@ -38,23 +39,43 @@ public class Authorities {
         this.authority = authority;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((authority == null) ? 0 : authority.hashCode());
+		result = prime * result + ((username == null) ? 0 : username.hashCode());
+		return result;
+	}
 
-        Authorities that = (Authorities) o;
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		Authorities other = (Authorities) obj;
+		if (authority == null) {
+			if (other.authority != null) {
+				return false;
+			}
+		} else if (!authority.equals(other.authority)) {
+			return false;
+		}
+		if (username == null) {
+			if (other.username != null) {
+				return false;
+			}
+		} else if (!username.equals(other.username)) {
+			return false;
+		}
+		return true;
+	}
 
-        if (username != null ? !username.equals(that.username) : that.username != null) return false;
-        if (authority != null ? !authority.equals(that.authority) : that.authority != null) return false;
 
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = username != null ? username.hashCode() : 0;
-        result = 31 * result + (authority != null ? authority.hashCode() : 0);
-        return result;
-    }
 }

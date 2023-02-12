@@ -1,28 +1,27 @@
 package ru.demidov.controllers;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 public class ViewController {
 
-    @RequestMapping(value = "/final", method = RequestMethod.GET)
+	@GetMapping(value = "/final")
     public String completionOfRegistration() {
         return "final";
     }
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+	@GetMapping(value = "/")
     public String mainForm() {
         return "registration";
     }
 
-    @RequestMapping(value = "/error", method = RequestMethod.GET)
+	@GetMapping(value = "/error")
     public String registrationError() {
         return "error";
     }
 
-    @RequestMapping(value = "/successfully", method = RequestMethod.GET)
+	@GetMapping(value = "/successfully")
     public String successfullyRegistration() {
         return "success";
     }

@@ -1,6 +1,8 @@
 package ru.demidov.action;
 
-import org.hibernate.Session;
+import javax.mail.Session;
+import javax.servlet.http.HttpServletRequest;
+
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,14 +15,13 @@ import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 import ru.demidov.interfaces.UserManager;
 import ru.demidov.objects.Authorities;
 import ru.demidov.objects.Response;
-import ru.demidov.objects.Users;
-
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import javax.servlet.http.HttpServletRequest;
+import ru.demidov.users.Users;
 
 @Component
 public class UserManagerImpl implements UserManager {
@@ -31,7 +32,7 @@ public class UserManagerImpl implements UserManager {
     @Autowired
     private JavaMailSender mailSender;
 
-    private static final Logger logger = LoggerFactory.getLogger(UserManagerImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserManagerImpl.class);
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Response save(Users user, HttpServletRequest request) {
@@ -42,7 +43,7 @@ public class UserManagerImpl implements UserManager {
             response.setEmailCorrect(checkEmail(user.getEmail(), session));
 
             if(!response.isUsernameCorrect() || !response.isEmailCorrect()) {
-                logger.info("incorect login or email");
+                LOGGER.info("incorect login or email");
                 return response;
             }
             user.setPassword(encodeString(user.getPassword()));
@@ -54,7 +55,7 @@ public class UserManagerImpl implements UserManager {
             return response;
 
         } catch(Exception e) {
-            logger.info(" save. Error " + e.getMessage());
+            LOGGER.info(" save. Error " + e.getMessage());
             return new Response();
         }
     }
@@ -69,7 +70,7 @@ public class UserManagerImpl implements UserManager {
         } catch (NoResultException e) {
             return true;
         } catch (Exception e) {
-            logger.info("checkEmail " + e.getMessage());
+            LOGGER.info("checkEmail " + e.getMessage());
             return false;
         }
     }
@@ -77,7 +78,7 @@ public class UserManagerImpl implements UserManager {
     private boolean checkUsername (String username, Session session) {
         try {
             Users user = (Users) session.get(Users.class, username);
-            logger.info("username is " + user.getUsername());
+            LOGGER.info("username is " + user.getUsername());
             return false;
         } catch (NullPointerException npe) {
             return true;
@@ -114,7 +115,7 @@ public class UserManagerImpl implements UserManager {
             mailSender.send(email);
             return true;
         } catch (Exception e) {
-            logger.info(e.getMessage());
+            LOGGER.info(e.getMessage());
             return false;
         }
     }

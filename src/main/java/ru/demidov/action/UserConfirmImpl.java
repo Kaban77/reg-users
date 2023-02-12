@@ -1,51 +1,46 @@
 package ru.demidov.action;
 
-import org.hibernate.Session;
+
+
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import ru.demidov.interfaces.UserConfirm;
-import ru.demidov.objects.Users;
 
-import javax.persistence.Query;
+import ru.demidov.interfaces.UserConfirm;
+import ru.demidov.users.db.UsersRepository;
 
 @Component
 public class UserConfirmImpl implements UserConfirm {
 
-    @Autowired
-    private SessionFactory sessionFactory;
+	private final SessionFactory sessionFactory;
+	private final JavaMailSender mailSender;
+	private final UsersRepository usersRepository;
 
-    @Autowired
-    private JavaMailSender mailSender;
+	private static final Logger LOGGER = LoggerFactory.getLogger(UserConfirmImpl.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(UserConfirmImpl.class);
-
-
+	public UserConfirmImpl(SessionFactory sessionFactory, JavaMailSender mailSender, UsersRepository usersRepository) {
+		this.sessionFactory = sessionFactory;
+		this.mailSender = mailSender;
+		this.usersRepository = usersRepository;
+	}
 
     @Transactional(propagation = Propagation.REQUIRED)
     public String confirm(String hashUsername, String token) {
         try {
-            Session session = sessionFactory.getCurrentSession();
-            String hql = "from Users u where u.token = :token";
-            Query query = session.createQuery(hql);
-            Users user = (Users) query.setParameter("token", token).getSingleResult();
+			var user = usersRepository.getUserByToken(token);
 
             if(!isEquals(user.getUsername(), hashUsername)) {
-                logger.info("strings is not equals");
+                LOGGER.info("strings is not equals");
                 return "error";
             }
-
-            String update = "update Users set enabled = 1 where token = :token";
-            query = session.createQuery(update);
-            query.setParameter("token", token);
-            query.executeUpdate();
+			user.setEnabled(1);
+			usersRepository.update(user);
 
             if(!sendFinalEmail(user.getEmail())) {
                 return "error";
@@ -53,7 +48,7 @@ public class UserConfirmImpl implements UserConfirm {
 
             return "final";
         } catch (Exception e) {
-            logger.info("confirm. Error " + e.getMessage());
+			LOGGER.error("confirm. Error " + e.getMessage(), e);
             return "error";
         }
     }
@@ -69,6 +64,7 @@ public class UserConfirmImpl implements UserConfirm {
             email.setTo(address);
             email.setSubject("Registration completed");
 
+
             String text = "Registration completed successfully";
 
             email.setText(text);
@@ -77,7 +73,7 @@ public class UserConfirmImpl implements UserConfirm {
             mailSender.send(email);
             return true;
         } catch (Exception e) {
-            logger.info("sendFinalEmail. Error " + e.getMessage());
+            LOGGER.info("sendFinalEmail. Error " + e.getMessage());
             return false;
         }
     }
