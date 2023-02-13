@@ -4,7 +4,6 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.apache.tomcat.dbcp.dbcp2.BasicDataSource;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
@@ -20,6 +19,8 @@ import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import oracle.jdbc.datasource.impl.OracleDataSource;
 
 @Configuration
 @ComponentScan("ru.demidov")
@@ -51,11 +52,10 @@ public class HibernateSessionFactory {
     @Bean
     public DataSource restDataSource() {
         try {
-            final BasicDataSource dataSource = new BasicDataSource();
+			final OracleDataSource dataSource = new OracleDataSource();
 			// TODO
-            dataSource.setDriverClassName("oracle.jdbc.OracleDriver");
-            dataSource.setUrl("jdbc:oracle:thin:@localhost:1521:XE");
-            dataSource.setUsername("kaban77");
+			dataSource.setURL("jdbc:oracle:thin:@localhost:1521:XE");
+			dataSource.setUser("kaban77");
             dataSource.setPassword("kaban77");
 
             return dataSource;

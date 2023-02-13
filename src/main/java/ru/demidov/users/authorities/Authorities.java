@@ -1,4 +1,4 @@
-package ru.demidov.objects;
+package ru.demidov.users.authorities;
 
 
 import jakarta.persistence.Basic;

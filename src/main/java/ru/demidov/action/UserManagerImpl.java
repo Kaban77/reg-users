@@ -1,14 +1,10 @@
 package ru.demidov.action;
 
-import javax.mail.Session;
-import javax.servlet.http.HttpServletRequest;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfToken;
@@ -17,30 +13,38 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.NoResultException;
-import jakarta.persistence.Query;
+import jakarta.servlet.http.HttpServletRequest;
+import ru.demidov.email.Email;
+import ru.demidov.email.EmailSenderService;
 import ru.demidov.interfaces.UserManager;
-import ru.demidov.objects.Authorities;
-import ru.demidov.objects.Response;
+import ru.demidov.users.UserRegistrationResponse;
 import ru.demidov.users.Users;
+import ru.demidov.users.authorities.Authorities;
+import ru.demidov.users.db.UsersRepository;
 
 @Component
 public class UserManagerImpl implements UserManager {
 
-    @Autowired
-    private SessionFactory sessionFactory;
-
-    @Autowired
-    private JavaMailSender mailSender;
+	private final SessionFactory sessionFactory;
+	private final EmailSenderService emailSenderService;
+	private final UsersRepository usersRepository;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserManagerImpl.class);
 
+	public UserManagerImpl(SessionFactory sessionFactory, EmailSenderService emailSenderService, UsersRepository usersRepository) {
+		this.sessionFactory = sessionFactory;
+		this.emailSenderService = emailSenderService;
+		this.usersRepository = usersRepository;
+	}
+
     @Transactional(propagation = Propagation.REQUIRED)
-    public Response save(Users user, HttpServletRequest request) {
+	@Override
+    public UserRegistrationResponse save(Users user, HttpServletRequest request) {
         try {
             Session session = sessionFactory.getCurrentSession();
-            Response response = new Response();
+            UserRegistrationResponse response = new UserRegistrationResponse();
             response.setUsernameCorrect(checkUsername(user.getUsername(), session));
-            response.setEmailCorrect(checkEmail(user.getEmail(), session));
+			response.setEmailCorrect(checkEmail(user.getEmail()));
 
             if(!response.isUsernameCorrect() || !response.isEmailCorrect()) {
                 LOGGER.info("incorect login or email");
@@ -55,35 +59,32 @@ public class UserManagerImpl implements UserManager {
             return response;
 
         } catch(Exception e) {
-            LOGGER.info(" save. Error " + e.getMessage());
-            return new Response();
+			LOGGER.error(" save. Error " + e.getMessage(), e);
+            return new UserRegistrationResponse();
         }
     }
 
-    private boolean checkEmail (String email, Session session) {
+	private boolean checkEmail(String email) {
         try {
-            String hql = "FROM Users u WHERE u.email = :email";
-            Query query = session.createQuery(hql);
-            Users user = (Users) query.setParameter("email", email).getSingleResult();
-
+			usersRepository.getUserByEmail(email);
             return false;
         } catch (NoResultException e) {
             return true;
         } catch (Exception e) {
-            LOGGER.info("checkEmail " + e.getMessage());
+			LOGGER.error("checkEmail " + e.getMessage(), e);
             return false;
         }
     }
 
     private boolean checkUsername (String username, Session session) {
         try {
-            Users user = (Users) session.get(Users.class, username);
+			var user = usersRepository.getUserById(username);
             LOGGER.info("username is " + user.getUsername());
             return false;
         } catch (NullPointerException npe) {
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+			LOGGER.error("Error: ", e);
             return false;
         }
     }
@@ -100,24 +101,17 @@ public class UserManagerImpl implements UserManager {
     }
 
     private boolean sendConfirmEmail(Users user) {
-        try {
-            SimpleMailMessage email = new SimpleMailMessage();
-            email.setTo(user.getEmail());
-            email.setSubject("Confirmation of registration");
+		var email = new Email();
+		email.setSendTo(user.getEmail());
+		email.setTitle("Confirmation of registration");
 
-            String text = "Dear " + user.getUsername() + "!\nTo confirm the registration, follow the link:\n" +
-                          "http://localhost:8084/confirm-user?user=" + encodeString(user.getUsername()) +
-                          "&token=" + user.getToken();
+		String text = "Dear " + user.getUsername() + "!\nTo confirm the registration, follow the link:\n"
+				+ "http://localhost:8084/confirm-user?user=" + encodeString(user.getUsername()) + "&token=" + user.getToken();
 
-            email.setText(text);
-            email.setFrom("Service");
+		email.setMessage(text);
 
-            mailSender.send(email);
-            return true;
-        } catch (Exception e) {
-            LOGGER.info(e.getMessage());
-            return false;
-        }
+		emailSenderService.sendEmail(email);
+		return true;
     }
 
 }

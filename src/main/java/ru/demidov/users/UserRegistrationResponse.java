@@ -1,12 +1,12 @@
-package ru.demidov.objects;
+package ru.demidov.users;
 
-public class Response {
+public class UserRegistrationResponse {
 
     private boolean isUsernameCorrect;
     private boolean isEmailCorrect;
     private boolean isEmailSent;
 
-    public Response() {
+    public UserRegistrationResponse() {
         this.isUsernameCorrect = false;
         this.isEmailCorrect = false;
         this.isEmailSent = false;

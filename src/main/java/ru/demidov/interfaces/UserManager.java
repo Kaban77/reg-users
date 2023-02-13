@@ -1,11 +1,11 @@
 package ru.demidov.interfaces;
 
-import ru.demidov.objects.Response;
+import jakarta.servlet.http.HttpServletRequest;
+import ru.demidov.users.UserRegistrationResponse;
 import ru.demidov.users.Users;
 
-import javax.servlet.http.HttpServletRequest;
 
 public interface UserManager {
 
-    public Response save(Users user, HttpServletRequest request);
+    public UserRegistrationResponse save(Users user, HttpServletRequest request);
 }
