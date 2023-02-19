@@ -1,4 +1,4 @@
-package ru.demidov.interfaces;
+package ru.demidov.users.interfaces;
 
 public interface UserConfirm {
 

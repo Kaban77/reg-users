@@ -1,4 +1,4 @@
-package ru.demidov.interfaces;
+package ru.demidov.users.interfaces;
 
 import jakarta.servlet.http.HttpServletRequest;
 import ru.demidov.users.UserRegistrationResponse;

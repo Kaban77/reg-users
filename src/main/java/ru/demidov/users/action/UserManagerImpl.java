@@ -1,4 +1,4 @@
-package ru.demidov.action;
+package ru.demidov.users.action;
 
 
 import org.hibernate.Session;
@@ -16,11 +16,11 @@ import jakarta.persistence.NoResultException;
 import jakarta.servlet.http.HttpServletRequest;
 import ru.demidov.email.Email;
 import ru.demidov.email.EmailSenderService;
-import ru.demidov.interfaces.UserManager;
 import ru.demidov.users.UserRegistrationResponse;
 import ru.demidov.users.Users;
 import ru.demidov.users.authorities.Authorities;
 import ru.demidov.users.db.UsersRepository;
+import ru.demidov.users.interfaces.UserManager;
 
 @Component
 public class UserManagerImpl implements UserManager {

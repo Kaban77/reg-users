@@ -1,4 +1,4 @@
-package ru.demidov.action;
+package ru.demidov.users.action;
 
 
 
@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ru.demidov.email.Email;
 import ru.demidov.email.EmailSenderService;
-import ru.demidov.interfaces.UserConfirm;
 import ru.demidov.users.db.UsersRepository;
+import ru.demidov.users.interfaces.UserConfirm;
 
 @Component
 public class UserConfirmImpl implements UserConfirm {
