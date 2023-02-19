@@ -14,9 +14,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import ru.demidov.users.Users;
-import ru.demidov.users.authorities.Authorities;
-
 @Configuration
 @ComponentScan("ru.demidov")
 @EnableTransactionManagement
@@ -32,7 +29,7 @@ public class HibernateSessionFactory {
 	private String password;
 
     @Bean
-    public DataSource restDataSource() {
+    public DataSource getDataSource() {
 		final PGSimpleDataSource dataSource = new PGSimpleDataSource();
 
 		dataSource.setURL(url);
@@ -46,7 +43,8 @@ public class HibernateSessionFactory {
 	public SessionFactory sessionFactory() {
 		var serviceRegistry = new StandardServiceRegistryBuilder()
 				.applySetting(AvailableSettings.TRANSACTION_COORDINATOR_STRATEGY, "jdbc")
-				.applySetting(AvailableSettings.URL, url).applySetting(AvailableSettings.USER, user)
+				.applySetting(AvailableSettings.URL, url)
+				.applySetting(AvailableSettings.USER, user)
 				.applySetting(AvailableSettings.PASS, password)
 				.applySetting(AvailableSettings.DIALECT, "org.hibernate.dialect.PostgreSQLDialect")
 				.applySetting(AvailableSettings.SHOW_SQL, "true")
@@ -54,7 +52,6 @@ public class HibernateSessionFactory {
 
 		var metadata = new MetadataSources(serviceRegistry)
 				.addPackage("ru.demidov")
-				.addAnnotatedClasses(Authorities.class, Users.class)
 				.getMetadataBuilder()
 				.applyImplicitNamingStrategy(ImplicitNamingStrategyJpaCompliantImpl.INSTANCE)
 				.build();

@@ -106,7 +106,7 @@ public class UserManagerImpl implements UserManager {
 		email.setTitle("Confirmation of registration");
 
 		String text = "Dear " + user.getUsername() + "!\nTo confirm the registration, follow the link:\n"
-				+ "http://localhost:8084/confirm-user?user=" + encodeString(user.getUsername()) + "&token=" + user.getToken();
+				+ "http://localhost:8080/confirm-user?user=" + encodeString(user.getUsername()) + "&token=" + user.getToken();
 
 		email.setMessage(text);
 
