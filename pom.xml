@@ -9,7 +9,7 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <java-version>19</java-version>
+        <java-version>20</java-version>
         <org.springframework-version>6.0.4</org.springframework-version>
         <org.spring-security-version>6.0.1</org.spring-security-version>
         <springboot.version>3.0.2</springboot.version>
